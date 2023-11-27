@@ -684,7 +684,6 @@ function explorerPageMaker() {
   // add event click for explore more
   allBusinessesCard.forEach(element => {
     element.querySelector(`.explorer-button`).addEventListener('click', function (e) {
-      console.log(e)
       history.pushState(null, null, `/${element.dataset.username}`);
       renderPage(`/${element.dataset.username}`);
     });
