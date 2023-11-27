@@ -684,6 +684,7 @@ function explorerPageMaker() {
   // add event click for explore more
   allBusinessesCard.forEach(element => {
     element.querySelector(`.explorer-button`).addEventListener('click', function (e) {
+      console.log(e)
       history.pushState(null, null, `/${element.dataset.username}`);
       renderPage(`/${element.dataset.username}`);
     });
@@ -1146,6 +1147,13 @@ navLogoLink.addEventListener('click', function () {
   renderPage(`/`);
 })
 
+
+//business explorer btn event click
+const headerBusinessExplorerButton = document.querySelector(`.header-business-explorer`);
+headerBusinessExplorerButton.addEventListener('click', function () {
+  history.pushState(null, null, `/businesses-explorer`);
+  renderPage(`/businesses-explorer`);
+})
 
 
 
