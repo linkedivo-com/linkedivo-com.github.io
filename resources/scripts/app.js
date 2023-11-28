@@ -873,7 +873,7 @@ function homePage() {
 
   homeFormSubmit.addEventListener('submit', function (e) {
     e.preventDefault();
-    searchFilter = searchFieldHome.value;
+    searchFilter = searchFieldHome.value.trim().toLowerCase();
 
     console.log(searchFieldHome.value);
     console.log(searchFilter);
@@ -1204,5 +1204,6 @@ function notification(message) {
     notif.style.display = 'none'
   }, 2000);
 }
+
 
 // live-server --entry-file=index.html
