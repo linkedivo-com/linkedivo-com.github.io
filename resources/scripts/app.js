@@ -589,39 +589,7 @@ function explorerPageMaker() {
         
         <input class="search-box box-shadow" type="text" placeholder="Search..." />
       </div>
-
-
       </div>
-  <!--
-      <div class="explorer-search-field">
-        <div class="explorer-filter">
-          <div class="filter-country box-shadow filter-card">
-            <div  class="filter-selector">
-            <span data-type="country">All Countries</span>
-            <i class="fa fa-angle-down"></i>
-            </div>
-            <div class="dropdown-content box-shadow"></div>
-          </div>
-          <div class="filter-city box-shadow filter-card">
-            <div  class="filter-selector">
-            <span data-type="city">All Cities</span>
-            <i class="fa fa-angle-down"></i>
-            </div>
-            <div class="dropdown-content box-shadow"></div>
-
-          </div>
-          <div class="filter-category box-shadow filter-card">
-            <div class="filter-selector">
-            <span data-type="category">All Categories</span>
-            <i class="fa fa-angle-down"></i>
-            </div>
-            <div class="dropdown-content box-shadow"> </div>
-          </div>
-        </div>
-
-        <input type="search" placeholder="Search..." />
-      </div>
- -->
       <div class="business-lists">
       </div>
     </main>`;
