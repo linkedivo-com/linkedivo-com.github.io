@@ -1,4 +1,77 @@
-const metaDescription=document.querySelector('meta[name="description"]'),app=document.getElementById("app"),loader=document.querySelector(".loader-wrapper");let isBusinessNameValid,username="",businessInfo,businessesList,countries=[],cities=[],categories=[],searchFilter="",defaultBusinessCards,defaultCheckBox,categoriesDrobDownVar,locationsDrobDownVar;async function renderPage(e){switch(e){case"/":homePage();break;case"/businesses-explorer":fetchBusinessExplorer();break;default:await businessUsernamesChecker(e)}}function navigate(){let e=window.location.pathname.toLowerCase();renderPage(e)}async function fetchBusinessInformation(){let e;try{let s=await fetch(`resources/businesses/${username}/information/en.json`);s?e=await s.json():console.log("we have error"),businessInfo=e,businessPageMaker()}catch(a){return a}businessPageMaker()}function businessPageMaker(){app.innerHTML=`
+
+// variables
+const metaDescription = document.querySelector('meta[name="description"]');
+const app = document.getElementById("app");
+const loader = document.querySelector(`.loader-wrapper`);
+
+let isBusinessNameValid; //use for business validity checker
+
+let username = "";
+let businessInfo;
+let businessesList;
+let countries = [];
+let cities = [];
+let categories = [];
+let searchFilter = "";
+let defaultBusinessCards;
+let defaultCheckBox;
+let categoriesDrobDownVar;
+let locationsDrobDownVar;
+// page loader
+window.onload = function () {
+  loader.style.display = "none";
+};
+
+
+async function renderPage(pathname) {
+  switch (pathname) {
+    case "/":
+      homePage();
+      break;
+    case "/businesses-explorer":
+      fetchBusinessExplorer();
+      break;
+    // Add more cases for other paths
+    default:
+      await businessUsernamesChecker(pathname);
+    // app.innerHTML = "<h1>404 - Not Found</h1>";
+  }
+}
+
+function navigate() {
+  const pathname = window.location.pathname.toLowerCase();
+  renderPage(pathname);
+}
+// Listen to changes in the URL
+window.addEventListener("popstate", navigate);
+navigate();
+
+// read each business info from API
+async function fetchBusinessInformation() {
+  let data;
+  try {
+    const response = await fetch(
+      `resources/businesses/${username}/information/en.json`
+    );
+    if (response) {
+      data = await response.json();
+    } else {
+      console.log("we have error");
+    }
+    businessInfo = data;
+    businessPageMaker();
+    // return data;
+  } catch (error) {
+    // You can handle errors or return a default value here if needed
+    return error;
+  }
+  businessPageMaker();
+}
+
+//business page maker function
+function businessPageMaker() {
+  // header //////////////////////////////////////////////////////
+  app.innerHTML = `
       <main class="main-business" id="main-business">
         <!-- header -->
         <div class="header-content">
@@ -107,92 +180,383 @@ const metaDescription=document.querySelector('meta[name="description"]'),app=doc
           <!-- More Info -->
           <div class="main-more-info"></div>
         </div>
-      </main>`;let e=document.querySelector(".header-profile-logo"),s=document.querySelector(".business-name"),a=document.querySelector(".business-field"),i=document.querySelector(".header-info-location"),t=document.querySelector(".header-info-website"),n=document.querySelector(".header-info-phone"),o=document.querySelector(".header-info-email"),r=document.querySelector(".header-qr-code-img"),l=document.querySelector(".main-overview"),c=document.querySelector(".main-services"),d=document.querySelector(".contact-info-details"),u=document.querySelector(".contact-info-map iframe"),f=document.querySelector(".main-gallery"),v=document.querySelector(".main-more-info"),p=document.querySelector(".fa-user-plus");metaDescription.setAttribute("content",businessInfo.info.metaDescription),document.title=`${businessInfo.info.name} | ${businessInfo.info.slogan}`,s.innerHTML=businessInfo.info.name,e.setAttribute("src",`resources/businesses/${username}/images/${username}-logo.png`),e.setAttribute("alt",`${businessInfo.info.name} logo`),a.innerHTML=businessInfo.info.slogan,i.innerHTML=`${businessInfo.info.country} | ${businessInfo.info.city}`,t.setAttribute("href",businessInfo.info.url),t.innerHTML=`www.${businessInfo.info.url.split("//")[1]}`,o.setAttribute("href",`mailto:${businessInfo.info.email}`),o.innerHTML=businessInfo.info.email,n.setAttribute("href",`tel:${businessInfo.info.phone}`),n.innerHTML=businessInfo.info.phone,r.setAttribute("src",`resources/businesses/${username}/images/${username}-qr-code.svg`),r.setAttribute("alt",`${businessInfo.info.name} QR code`),addToContactFunc(p,businessInfo.info.name,businessInfo.info.email,`https://linkedivo.com/${businessInfo.info.userName}`,businessInfo.info.phone);let y=document.querySelector(".fa-share-alt");y.addEventListener("click",function(){modalShareInfoHandler(`https://linkedivo.com/${businessInfo.info.userName}`)});let h=document.querySelector(".fa-bookmark");h.addEventListener("click",function(){notification("This option will be available in next version")}),businessNavMaker(),businessInfo.overview.mission&&(l.innerHTML+=`<div class="overview-card details-card box-shadow">
+      </main>`;
+
+  const headerProfileLogo = document.querySelector(`.header-profile-logo`);
+  const businessName = document.querySelector(`.business-name`);
+  const businessField = document.querySelector(`.business-field`);
+
+  const headerInfoLocation = document.querySelector(`.header-info-location`);
+  const headerInfoWebsite = document.querySelector(`.header-info-website`);
+  const headerInfoPhone = document.querySelector(`.header-info-phone`);
+  const headerInfoEmail = document.querySelector(`.header-info-email`);
+
+  const headerQrCode = document.querySelector(`.header-qr-code-img`);
+
+  const overview = document.querySelector(`.main-overview`);
+  const services = document.querySelector(`.main-services`);
+  const contacts = document.querySelector(`.contact-info-details`);
+  const mapIframe = document.querySelector(`.contact-info-map iframe`);
+  const gallery = document.querySelector(`.main-gallery`);
+  const moreInfo = document.querySelector(`.main-more-info`);
+
+  const addToContact = document.querySelector(`.fa-user-plus`);
+
+
+  metaDescription.setAttribute("content", businessInfo.info.metaDescription);
+  document.title = `${businessInfo.info.name} | ${businessInfo.info.slogan}`;
+
+  businessName.innerHTML = businessInfo.info.name;
+  headerProfileLogo.setAttribute(
+    "src",
+    `resources/businesses/${username}/images/${username}-logo.png`
+  );
+  headerProfileLogo.setAttribute("alt", `${businessInfo.info.name} logo`);
+  businessField.innerHTML = businessInfo.info.slogan; // need to change
+
+  headerInfoLocation.innerHTML = `${businessInfo.info.country} | ${businessInfo.info.city}`;
+
+  headerInfoWebsite.setAttribute("href", businessInfo.info.url);
+  headerInfoWebsite.innerHTML = `www.${businessInfo.info.url.split("//")[1]}`;
+
+  headerInfoEmail.setAttribute("href", `mailto:${businessInfo.info.email}`);
+  headerInfoEmail.innerHTML = businessInfo.info.email;
+
+  headerInfoPhone.setAttribute("href", `tel:${businessInfo.info.phone}`);
+  headerInfoPhone.innerHTML = businessInfo.info.phone;
+
+  headerQrCode.setAttribute(
+    "src",
+    `resources/businesses/${username}/images/${username}-qr-code.svg`
+  );
+  headerQrCode.setAttribute("alt", `${businessInfo.info.name} QR code`);
+
+  addToContactFunc(addToContact, businessInfo.info.name, businessInfo.info.email, `https://linkedivo.com/${businessInfo.info.userName}`, businessInfo.info.phone);
+
+  const modalShareLink = document.querySelector(`.fa-share-alt`);
+  modalShareLink.addEventListener('click', function () {
+    modalShareInfoHandler(`https://linkedivo.com/${businessInfo.info.userName}`);
+  });
+
+  const bookmark = document.querySelector(`.fa-bookmark`);
+  bookmark.addEventListener('click', function () {
+    notification('This option will be available in next version');
+  })
+
+
+
+  // header business navigation bar
+  businessNavMaker();
+
+
+  // body //////////////////////////////////////////////////////
+  // overview
+  // summary
+  if (businessInfo.overview.mission) {
+    overview.innerHTML += `<div class="overview-card details-card box-shadow">
             <h2 class="summary-title">Executive Summary</h2>
             <p class="summary-description">
             ${businessInfo.overview.summary}
             </p>
-            </div>`),businessInfo.overview.mission&&(l.innerHTML+=`
+            </div>`;
+  }
+  // mission
+  if (businessInfo.overview.mission) {
+    overview.innerHTML += `
             <div class="overview-card details-card box-shadow">
             <h2 class="mission-title">Mission</h2>
             <p class="mission-description">
             ${businessInfo.overview.mission}
             </p>
-            </div>`),businessInfo.overview.vision&&(l.innerHTML+=`
+            </div>`;
+  }
+  // vision
+  if (businessInfo.overview.vision) {
+    overview.innerHTML += `
             <div class="overview-card details-card box-shadow">
             <h2 class="vision-title">Vision</h2>
             <p class="vision-description">
             ${businessInfo.overview.vision}
             </p>
-            </div>`),businessInfo.overview.values&&(l.innerHTML+=`
+            </div>`;
+  }
+  // values
+  if (businessInfo.overview.values) {
+    overview.innerHTML += `
             <div class="overview-card details-card box-shadow">
             <h2 class="values-title">Values</h2>
             <p class="values-description">
             ${businessInfo.overview.values}
             </p>
-            </div>`),Object.keys(businessInfo.services).forEach(e=>{c.innerHTML+=`<div class="service-card box-shadow">
+            </div>`;
+  }
+
+  // services
+  Object.keys(businessInfo.services).forEach((key) => {
+    services.innerHTML += `<div class="service-card box-shadow">
             <div class="service-info">
-                <h3>${businessInfo.services[e].title}</h3>
+                <h3>${businessInfo.services[key].title}</h3>
                 <p>
-                    ${businessInfo.services[e].description};
+                    ${businessInfo.services[key].description};
                 </p>
             </div>
             <div class="service-img">
-                <img src='resources/businesses/${username}/images/${e}.svg' alt="${username}-${businessInfo.services[e].title}" />
+                <img src='resources/businesses/${username}/images/${key}.svg' alt="${username}-${businessInfo.services[key].title}" />
             </div>
-        </div>`}),businessInfo.contacts.address&&(d.innerHTML+=`
+        </div>`;
+  });
+
+  //contacts
+  //address
+  if (businessInfo.contacts.address) {
+    contacts.innerHTML += `
           <div class="contacts-address info-details-card">
                 <i class="fa fa-map-marker-alt"></i>
                 <p>${businessInfo.contacts.address}</p>
-              </div>`),businessInfo.contacts.phone&&(d.innerHTML+=`
+              </div>`;
+  }
+  // phone
+  if (businessInfo.contacts.phone) {
+    contacts.innerHTML += `
             <div class="contacts-phone info-details-card">
         <i class="fa fa-phone"></i>
         <a href="tel:${businessInfo.contacts.phone}">${businessInfo.contacts.phone}</a>
-    </div>`),businessInfo.contacts.website&&(d.innerHTML+=`
+    </div>`;
+  }
+  // website
+  if (businessInfo.contacts.website) {
+    contacts.innerHTML += `
               <div class="contacts-phone info-details-card">
                 <i class="fa fa-globe"></i>
-                <a href="${businessInfo.contacts.website}">www.${businessInfo.contacts.website.split("//")[1]}</a>
-              </div>`),businessInfo.contacts.email&&(d.innerHTML+=`
+                <a href="${businessInfo.contacts.website}">www.${businessInfo.contacts.website.split("//")[1]
+      }</a>
+              </div>`;
+  }
+  // email
+  if (businessInfo.contacts.email) {
+    contacts.innerHTML += `
               <div class="contacts-email info-details-card">
                 <i class="fa fa-envelope"></i>
                 <a href="mailto:${businessInfo.contacts.email}">${businessInfo.contacts.email}</a>
-              </div>`),businessInfo.contacts.socialMedia&&(d.innerHTML+='<div class="contacts-social-media info-details-card"></div>');let b=document.querySelector(".contacts-social-media");businessInfo.contacts.socialMedia.instagram&&(b.innerHTML+=`
+              </div>`;
+  }
+  //Social Media
+  if (businessInfo.contacts.socialMedia) {
+    contacts.innerHTML += `<div class="contacts-social-media info-details-card"></div>`;
+  }
+  const socialMedia = document.querySelector(`.contacts-social-media`);
+
+  //instagram
+  if (businessInfo.contacts.socialMedia.instagram) {
+    socialMedia.innerHTML += `
               <a href="${businessInfo.contacts.socialMedia.instagram}">
                   <i class="fab fa-instagram"></i>
-                </a>`),businessInfo.contacts.socialMedia.facebook&&(b.innerHTML+=`
+                </a>`;
+  }
+  //facebook
+  if (businessInfo.contacts.socialMedia.facebook) {
+    socialMedia.innerHTML += `
               <a href="${businessInfo.contacts.socialMedia.facebook}">
                   <i class="fab fa-facebook"></i>
-                </a>`),businessInfo.contacts.socialMedia.linkedin&&(b.innerHTML+=`
+                </a>`;
+  }
+  //linkedin
+  if (businessInfo.contacts.socialMedia.linkedin) {
+    socialMedia.innerHTML += `
               <a href="${businessInfo.contacts.socialMedia.linkedin}">
                   <i class="fab fa-linkedin"></i>
-                </a>`),businessInfo.contacts.socialMedia.whatsapp&&(b.innerHTML+=`
+                </a>`;
+  }
+  //whatsapp
+  if (businessInfo.contacts.socialMedia.whatsapp) {
+    socialMedia.innerHTML += `
               <a href="${businessInfo.contacts.socialMedia.whatsapp}">
                   <i class="fab fa-whatsapp"></i>
-                </a>`),businessInfo.contacts.socialMedia.telegram&&(b.innerHTML+=`
+                </a>`;
+  }
+  //telegram
+  if (businessInfo.contacts.socialMedia.telegram) {
+    socialMedia.innerHTML += `
               <a href="${businessInfo.contacts.socialMedia.telegram}">
                   <i class="fab fa-telegram"></i>
-                </a>`),businessInfo.contacts.socialMedia.youtube&&(b.innerHTML+=`
+                </a>`;
+  }
+  //youtube
+  if (businessInfo.contacts.socialMedia.youtube) {
+    socialMedia.innerHTML += `
               <a href="${businessInfo.contacts.socialMedia.youtube}">
                   <i class="fab fa-youtube"></i>
-                </a>`),businessInfo.contacts.socialMedia.twitter&&(b.innerHTML+=`
+                </a>`;
+  }
+  //twitter
+  if (businessInfo.contacts.socialMedia.twitter) {
+    socialMedia.innerHTML += `
               <a href="${businessInfo.contacts.socialMedia.twitter}">
                   <i class="fab fa-twitter"></i>
-                </a>`),businessInfo.contacts.googleMap&&u.setAttribute("src",businessInfo.contacts.googleMap),Object.keys(businessInfo.gallery).forEach(e=>{f.innerHTML+=`        
+                </a>`;
+  }
+  // google map
+  if (businessInfo.contacts.googleMap) {
+    mapIframe.setAttribute(`src`, businessInfo.contacts.googleMap);
+  }
+
+  // console.log(businessInfo.moreInfo)
+
+  // gallery
+  Object.keys(businessInfo.gallery).forEach((key) => {
+    gallery.innerHTML += `        
         <div class="gallery-card box-shadow">
             <div class="gallery-info">
-              <h3>${businessInfo.gallery[e].title}</h3>
+              <h3>${businessInfo.gallery[key].title}</h3>
               <p>
-               ${businessInfo.gallery[e].description}
+               ${businessInfo.gallery[key].description}
               </p>
             </div>
             <div class="gallery-img">
-                <img src='resources/businesses/${username}/images/${e}.svg' alt="${username}-${businessInfo.gallery[e].title}" /> 
+                <img src='resources/businesses/${username}/images/${key}.svg' alt="${username}-${businessInfo.gallery[key].title}" /> 
             </div>
-          </div>`}),Object.keys(businessInfo.moreInfo).forEach(e=>{v.innerHTML+=`   
+          </div>`;
+  });
+
+  //more info
+  Object.keys(businessInfo.moreInfo).forEach((key) => {
+    moreInfo.innerHTML += `   
          <div class="more-info-card">
-            <a href="${businessInfo.moreInfo[e].link}"
-            >- ${businessInfo.moreInfo[e].title}</a>
-        </div>`})}function businessNavMaker(){let e=document.querySelector(".nav-overview"),s=document.querySelector(".nav-services"),a=document.querySelector(".nav-contact"),i=document.querySelector(".nav-gallery"),t=document.querySelector(".nav-more-info"),n=document.querySelector(".main-overview"),o=document.querySelector(".main-services"),r=document.querySelector(".main-contacts"),l=document.querySelector(".main-gallery"),c=document.querySelector(".main-more-info");n.style.display="block",o.style.display="none",r.style.display="none",l.style.display="none",c.style.display="none",e.classList.add("header-nav-selected"),s.classList.remove("header-nav-selected"),a.classList.remove("header-nav-selected"),i.classList.remove("header-nav-selected"),t.classList.remove("header-nav-selected"),e.addEventListener("click",d=>{d.preventDefault(),n.style.display="block",o.style.display="none",r.style.display="none",l.style.display="none",c.style.display="none",e.classList.add("header-nav-selected"),s.classList.remove("header-nav-selected"),a.classList.remove("header-nav-selected"),i.classList.remove("header-nav-selected"),t.classList.remove("header-nav-selected")}),s.addEventListener("click",d=>{d.preventDefault(),n.style.display="none",o.style.display="block",r.style.display="none",l.style.display="none",c.style.display="none",e.classList.remove("header-nav-selected"),s.classList.add("header-nav-selected"),a.classList.remove("header-nav-selected"),i.classList.remove("header-nav-selected"),t.classList.remove("header-nav-selected")}),a.addEventListener("click",d=>{d.preventDefault(),n.style.display="none",o.style.display="none",r.style.display="block",l.style.display="none",c.style.display="none",e.classList.remove("header-nav-selected"),s.classList.remove("header-nav-selected"),a.classList.add("header-nav-selected"),i.classList.remove("header-nav-selected"),t.classList.remove("header-nav-selected")}),i.addEventListener("click",d=>{d.preventDefault(),n.style.display="none",o.style.display="none",r.style.display="none",l.style.display="block",c.style.display="none",e.classList.remove("header-nav-selected"),s.classList.remove("header-nav-selected"),a.classList.remove("header-nav-selected"),i.classList.add("header-nav-selected"),t.classList.remove("header-nav-selected")}),t.addEventListener("click",d=>{d.preventDefault(),n.style.display="none",o.style.display="none",r.style.display="none",l.style.display="none",c.style.display="block",e.classList.remove("header-nav-selected"),s.classList.remove("header-nav-selected"),a.classList.remove("header-nav-selected"),i.classList.remove("header-nav-selected"),t.classList.add("header-nav-selected")})}async function fetchBusinessExplorer(){let e;try{let s=await fetch("resources/businesses/general/businessesList.json");s?e=await s.json():console.log("we have error"),businessesList=e,explorerPageMaker()}catch(a){return a}}function explorerPageMaker(){app.innerHTML=`
+            <a href="${businessInfo.moreInfo[key].link}"
+            >- ${businessInfo.moreInfo[key].title}</a>
+        </div>`;
+  });
+}
+
+// header nav business maker
+function businessNavMaker() {
+  // variables
+  const navOverview = document.querySelector(`.nav-overview`);
+  const navServices = document.querySelector(`.nav-services`);
+  const navContact = document.querySelector(`.nav-contact`);
+  const navGallery = document.querySelector(`.nav-gallery`);
+  const navMoreInfo = document.querySelector(`.nav-more-info`);
+
+  const mainOverview = document.querySelector(`.main-overview`);
+  const mainServices = document.querySelector(`.main-services`);
+  const mainContact = document.querySelector(`.main-contacts`);
+  const mainGallery = document.querySelector(`.main-gallery`);
+  const mainMoreInfo = document.querySelector(`.main-more-info`);
+
+  // header nav menu selection
+
+  mainOverview.style.display = `block`;
+  mainServices.style.display = `none`;
+  mainContact.style.display = `none`;
+  mainGallery.style.display = `none`;
+  mainMoreInfo.style.display = `none`;
+
+  navOverview.classList.add(`header-nav-selected`);
+  navServices.classList.remove(`header-nav-selected`);
+  navContact.classList.remove(`header-nav-selected`);
+  navGallery.classList.remove(`header-nav-selected`);
+  navMoreInfo.classList.remove(`header-nav-selected`);
+
+  navOverview.addEventListener("click", (event) => {
+    event.preventDefault();
+    mainOverview.style.display = `block`;
+    mainServices.style.display = `none`;
+    mainContact.style.display = `none`;
+    mainGallery.style.display = `none`;
+    mainMoreInfo.style.display = `none`;
+
+    navOverview.classList.add(`header-nav-selected`);
+    navServices.classList.remove(`header-nav-selected`);
+    navContact.classList.remove(`header-nav-selected`);
+    navGallery.classList.remove(`header-nav-selected`);
+    navMoreInfo.classList.remove(`header-nav-selected`);
+  });
+
+  navServices.addEventListener("click", (event) => {
+    event.preventDefault();
+    mainOverview.style.display = `none`;
+    mainServices.style.display = `block`;
+    mainContact.style.display = `none`;
+    mainGallery.style.display = `none`;
+    mainMoreInfo.style.display = `none`;
+
+    navOverview.classList.remove(`header-nav-selected`);
+    navServices.classList.add(`header-nav-selected`);
+    navContact.classList.remove(`header-nav-selected`);
+    navGallery.classList.remove(`header-nav-selected`);
+    navMoreInfo.classList.remove(`header-nav-selected`);
+  });
+
+  navContact.addEventListener("click", (event) => {
+    event.preventDefault();
+    mainOverview.style.display = `none`;
+    mainServices.style.display = `none`;
+    mainContact.style.display = `block`;
+    mainGallery.style.display = `none`;
+    mainMoreInfo.style.display = `none`;
+
+    navOverview.classList.remove(`header-nav-selected`);
+    navServices.classList.remove(`header-nav-selected`);
+    navContact.classList.add(`header-nav-selected`);
+    navGallery.classList.remove(`header-nav-selected`);
+    navMoreInfo.classList.remove(`header-nav-selected`);
+  });
+
+  navGallery.addEventListener("click", (event) => {
+    event.preventDefault();
+    mainOverview.style.display = `none`;
+    mainServices.style.display = `none`;
+    mainContact.style.display = `none`;
+    mainGallery.style.display = `block`;
+    mainMoreInfo.style.display = `none`;
+
+    navOverview.classList.remove(`header-nav-selected`);
+    navServices.classList.remove(`header-nav-selected`);
+    navContact.classList.remove(`header-nav-selected`);
+    navGallery.classList.add(`header-nav-selected`);
+    navMoreInfo.classList.remove(`header-nav-selected`);
+  });
+
+  navMoreInfo.addEventListener("click", (event) => {
+    event.preventDefault();
+    mainOverview.style.display = `none`;
+    mainServices.style.display = `none`;
+    mainContact.style.display = `none`;
+    mainGallery.style.display = `none`;
+    mainMoreInfo.style.display = `block`;
+
+    navOverview.classList.remove(`header-nav-selected`);
+    navServices.classList.remove(`header-nav-selected`);
+    navContact.classList.remove(`header-nav-selected`);
+    navGallery.classList.remove(`header-nav-selected`);
+    navMoreInfo.classList.add(`header-nav-selected`);
+  });
+}
+
+// read  business explorer info from API
+async function fetchBusinessExplorer() {
+  let data;
+  try {
+    const response = await fetch(
+      `resources/businesses/general/businessesList.json`
+    );
+    if (response) {
+      data = await response.json();
+    } else {
+      console.log("we have error");
+    }
+    businessesList = data;
+    explorerPageMaker();
+    // return data;
+  } catch (error) {
+    // You can handle errors or return a default value here if needed
+    return error;
+  }
+}
+
+// explorer page maker function
+function explorerPageMaker() {
+  app.innerHTML = `
     <!-- main -->
     <main class="explorer-main-business" id="main-business">
       <div class="explorer-title-heading">
@@ -228,44 +592,255 @@ const metaDescription=document.querySelector('meta[name="description"]'),app=doc
 
 
       </div>
+  <!--
+      <div class="explorer-search-field">
+        <div class="explorer-filter">
+          <div class="filter-country box-shadow filter-card">
+            <div  class="filter-selector">
+            <span data-type="country">All Countries</span>
+            <i class="fa fa-angle-down"></i>
+            </div>
+            <div class="dropdown-content box-shadow"></div>
+          </div>
+          <div class="filter-city box-shadow filter-card">
+            <div  class="filter-selector">
+            <span data-type="city">All Cities</span>
+            <i class="fa fa-angle-down"></i>
+            </div>
+            <div class="dropdown-content box-shadow"></div>
+
+          </div>
+          <div class="filter-category box-shadow filter-card">
+            <div class="filter-selector">
+            <span data-type="category">All Categories</span>
+            <i class="fa fa-angle-down"></i>
+            </div>
+            <div class="dropdown-content box-shadow"> </div>
+          </div>
+        </div>
+
+        <input type="search" placeholder="Search..." />
+      </div>
+ -->
       <div class="business-lists">
       </div>
-    </main>`;let e=document.querySelector(".business-lists"),s=document.querySelector(".explorer-search-field input"),a=document.querySelector(".filter-country  .dropdown-content "),i=document.querySelector(".filter-city .dropdown-content "),t=document.querySelector(".filter-category .dropdown-content "),n=document.querySelector(".search-box");n.value=searchFilter;let o=document.querySelectorAll(".filter-card .filter-selector ");async function r(){let e;try{let s=await fetch("resources/businesses/general/categories.json");s?e=await s.json():console.log("we have error"),(categoriesDrobDownVar=e).categories.forEach(e=>{t.innerHTML+=`
-        <label>
-        <span> ${e.title}</span>
-        <input type="checkbox" value="${e.slug}" data-type="category">
-        </label>`})}catch(a){return a}}async function l(){let e;try{let s=await fetch("resources/businesses/general/locations.json");s?e=await s.json():console.log("we have error"),(locationsDrobDownVar=e).countries.forEach(e=>{a.innerHTML+=`
-          <label>
-            <span > ${e.title}</span>
-            <input type="checkbox" value="${e.slug}" data-type="country">
-          </label>`,e.subcategories.forEach(e=>{i.innerHTML+=`
-          <label>
-            <span > ${e.title}</span>
-            <input type="checkbox" value="${e.slug}" data-type="city">
-          </label>  `})})}catch(t){return t}let n=document.querySelectorAll(".explorer-business-card"),o=document.querySelectorAll(".dropdown-content label input"),r=document.querySelectorAll(".filter-selector > span");defaultBusinessCards=n,o.forEach(e=>{e.addEventListener("click",function(e){e.stopPropagation(),filterUpdater(defaultBusinessCards,defaultCheckBox=e.target,searchFilter),filterTitleUpdater(o,r),filterDropdownCityUpdater()})})}function c(e,s){e.style.display="none",s&&(s.classList.add("fa-angle-down"),s.classList.remove("fa-angle-up"))}function d(e){let s=document.querySelectorAll(".dropdown-content"),a=document.querySelectorAll(".filter-card .fa");s.forEach(s=>{s!==e&&c(s)}),a.forEach(e=>e.classList.add("fa-angle-down")),a.forEach(e=>e.classList.remove("fa-angle-up"))}Object.keys(businessesList).forEach(s=>{e.innerHTML+=`
-    <div class="explorer-business-card box-shadow" data-name="${businessesList[s].name}" data-country="${businessesList[s].country}" data-city="${businessesList[s].city}" data-categories="${businessesList[s].categories}" data-username="${businessesList[s].userName}">
+    </main>`;
+
+  const businessListItems = document.querySelector(`.business-lists`);
+  const searchExplorer = document.querySelector(`.explorer-search-field input`);
+  const countriesDropDown = document.querySelector(
+    `.filter-country  .dropdown-content `
+  );
+  const citiesDropDown = document.querySelector(
+    `.filter-city .dropdown-content `
+  );
+  const categoryDropDown = document.querySelector(
+    `.filter-category .dropdown-content `
+  );
+
+  const searchBox = document.querySelector(`.search-box`);
+  searchBox.value = searchFilter;
+
+  const filterCardsToggeler = document.querySelectorAll(".filter-card .filter-selector ");
+  // add businesses to explorer page
+  Object.keys(businessesList).forEach((key) => {
+    businessListItems.innerHTML += `
+    <div class="explorer-business-card box-shadow" data-name="${businessesList[key].name}" data-country="${businessesList[key].country}" data-city="${businessesList[key].city}" data-categories="${businessesList[key].categories}" data-username="${businessesList[key].userName}">
       <div class="explorer-card-container">
         <div class="explorer-profile">
           <div class="explorer-logo">
             <img
-              src="${businessesList[s].logo}"
-              alt="${businessesList[s].name} logo"
+              src="${businessesList[key].logo}"
+              alt="${businessesList[key].name} logo"
             />
           </div>
           <div class="explorer-title">
-            <h3>${businessesList[s].name} </h3>
-            <h4>${businessesList[s].title}</h4>
+            <h3>${businessesList[key].name} </h3>
+            <h4>${businessesList[key].title}</h4>
           </div>
         </div>
-        <p>${businessesList[s].metaDescription}
+        <p>${businessesList[key].metaDescription}
         </p>
-        <div class="explorer-country">${businessesList[s].country} | ${businessesList[s].city}</div>
+        <div class="explorer-country">${businessesList[key].country} | ${businessesList[key].city}</div>
       </div>
       <div class="explorer-button">
         <button>Explore More</button>
       </div>
     </div>
-    `}),allBusinessesCard=document.querySelectorAll(".explorer-business-card"),s.addEventListener("keyup",e=>{filterUpdater(defaultBusinessCards,defaultCheckBox,searchFilter=e.target.value.trim().toLowerCase())}),searchFilter= e.target.value.trim().toLowerCase(),filterUpdater(allBusinessesCard,defaultCheckBox,searchFilter),allBusinessesCard.forEach(e=>{e.querySelector(".explorer-button").addEventListener("click",function(s){console.log(s),history.pushState(null,null,`/${e.dataset.username}`),renderPage(`/${e.dataset.username}`)})}),r(),l(),o.forEach(e=>{e.addEventListener("click",function(e){var s,a;e.stopPropagation();let i=e.target.closest(".filter-card").querySelector(".dropdown-content"),t=e.target.querySelector(".fa");"flex"===i.style.display?c(i,t):(d(i),s=i,a=t,s.style.display="flex",a&&(a.classList.add("fa-angle-up"),a.classList.remove("fa-angle-down")))})}),document.addEventListener("click",function(e){let s=e.target.closest(".filter-card");s||d(null)})}function homePage(){app.innerHTML=`
+    `;
+  });
+
+  allBusinessesCard = document.querySelectorAll(`.explorer-business-card`);
+
+  searchExplorer.addEventListener("keyup", (e) => {
+    // const searchText = e.target.value.trim().toLowerCase();
+    searchFilter = e.target.value.trim().toLowerCase();
+    filterUpdater(defaultBusinessCards, defaultCheckBox, searchFilter);
+  });
+  searchFilter = e.target.value.trim().toLowerCase();
+  filterUpdater(allBusinessesCard, defaultCheckBox, searchFilter);
+
+
+  // add event click for explore more
+  allBusinessesCard.forEach(element => {
+    element.querySelector(`.explorer-button`).addEventListener('click', function (e) {
+      console.log(e)
+      history.pushState(null, null, `/${element.dataset.username}`);
+      renderPage(`/${element.dataset.username}`);
+    });
+  })
+
+  // function filter drop down maker
+
+  // set categories
+  async function fetchCategories() {
+    let data;
+    try {
+      const response = await fetch(
+        `resources/businesses/general/categories.json`
+      );
+      if (response) {
+        data = await response.json();
+      } else {
+        console.log("we have error");
+      }
+      categoriesDrobDownVar = data;
+      // console.log(countryDrobDown.categories[0].title)
+
+      categoriesDrobDownVar.categories.forEach((element) => {
+        // console.log(element.title)
+        categoryDropDown.innerHTML += `
+        <label>
+        <span> ${element.title}</span>
+        <input type="checkbox" value="${element.slug}" data-type="category">
+        </label>`;
+      });
+
+      // return data;
+    } catch (error) {
+      // You can handle errors or return a default value here if needed
+      return error;
+    }
+  }
+  fetchCategories();
+
+  // set country and cities
+  async function fetchCountriesAndCities() {
+    let data;
+    try {
+      const response = await fetch(
+        `resources/businesses/general/locations.json`
+      );
+      if (response) {
+        data = await response.json();
+      } else {
+        console.log("we have error");
+      }
+      locationsDrobDownVar = data;
+      locationsDrobDownVar.countries.forEach((element) => {
+        countriesDropDown.innerHTML += `
+          <label>
+            <span > ${element.title}</span>
+            <input type="checkbox" value="${element.slug}" data-type="country">
+          </label>`;
+
+        element.subcategories.forEach((elem) => {
+          citiesDropDown.innerHTML += `
+          <label>
+            <span > ${elem.title}</span>
+            <input type="checkbox" value="${elem.slug}" data-type="city">
+          </label>  `;
+
+        });
+      });
+
+      // return data;
+    } catch (error) {
+      // You can handle errors or return a default value here if needed
+      return error;
+    }
+
+
+    // // Filter checkbox - dropdown filter - checkbox event in dropdown list  
+    const businessCards = document.querySelectorAll('.explorer-business-card');
+    const filterCheckBox = document.querySelectorAll(`.dropdown-content label input`);
+    const filterTitleName = document.querySelectorAll(`.filter-selector > span`)
+    defaultBusinessCards = businessCards;
+    filterCheckBox.forEach(element => {
+      // console.log(element.getAttribute('value'));
+      element.addEventListener('click', function (e) {
+        e.stopPropagation();
+        defaultCheckBox = e.target;
+        filterUpdater(defaultBusinessCards, defaultCheckBox, searchFilter);
+        filterTitleUpdater(filterCheckBox, filterTitleName);
+        filterDropdownCityUpdater();
+      })
+    })
+  }
+  fetchCountriesAndCities();
+
+
+
+  // filter drop down list toggler //////////////////////////////////////////////////////////
+  filterCardsToggeler.forEach((elem) => {
+    elem.addEventListener("click", function (e) {
+      e.stopPropagation();
+      const dropdownContent = e.target.closest(".filter-card").querySelector(".dropdown-content");
+      const angleIcon = e.target.querySelector(".fa");
+
+      if (dropdownContent.style.display === "flex") {
+        closeDropdown(dropdownContent, angleIcon);
+      } else {
+        closeAllDropdownsExcept(dropdownContent);
+        openDropdown(dropdownContent, angleIcon);
+      }
+    });
+  });
+
+  // Function to close dropdown
+  function closeDropdown(dropdownContent, angleIcon) {
+    dropdownContent.style.display = "none";
+    if (angleIcon) {
+      angleIcon.classList.add(`fa-angle-down`);
+      angleIcon.classList.remove(`fa-angle-up`);
+    }
+  }
+  // Function to open dropdown
+  function openDropdown(dropdownContent, angleIcon) {
+    dropdownContent.style.display = "flex";
+    if (angleIcon) {
+      angleIcon.classList.add(`fa-angle-up`);
+      angleIcon.classList.remove(`fa-angle-down`);
+    }
+  }
+  // Function to close all dropdowns except the provided one
+  function closeAllDropdownsExcept(excludeDropdown) {
+    const allDropdowns = document.querySelectorAll(".dropdown-content");
+    const allAngleIcons = document.querySelectorAll(".filter-card .fa");
+
+    allDropdowns.forEach((dropdown) => {
+      if (dropdown !== excludeDropdown) {
+        closeDropdown(dropdown);
+      }
+    });
+
+    allAngleIcons.forEach((icon) => icon.classList.add("fa-angle-down"));
+    allAngleIcons.forEach((icon) => icon.classList.remove("fa-angle-up"));
+  }
+
+  // Event listener for clicks outside of filter cards
+  document.addEventListener("click", function (event) {
+    const isClickInsideFilterCard = event.target.closest(".filter-card");
+    if (!isClickInsideFilterCard) {
+      closeAllDropdownsExcept(null);
+    }
+  });
+}
+
+
+// function homepage Maker
+function homePage() {
+  app.innerHTML = `
  <main class="home-main-business" id="main-business">
       <div class="home-logo">
         <img
@@ -282,18 +857,353 @@ const metaDescription=document.querySelector('meta[name="description"]'),app=doc
       </div>
             <h1 class="home-slogan">Where connection Happen</h1>
 
-    </main>`;let e=document.querySelector(".home-form-explore"),s=document.querySelector(".home-search button"),a=document.querySelector(".home-form-explore input");s.addEventListener("click",function(e){e.preventDefault(),searchFilter=a.value,history.pushState(null,null,"/businesses-explorer"),renderPage("/businesses-explorer")}),e.addEventListener("submit",function(e){e.preventDefault(),searchFilter=a.value.trim().toLowerCase(),console.log(a.value),console.log(searchFilter),history.pushState(null,null,"/businesses-explorer"),renderPage("/businesses-explorer")}),a.focus()}async function businessUsernamesChecker(e){let s,a;try{let i=await fetch("resources/businesses/general/businessUsernames.json");i?(s=await i.json(),username=e.split("/")[1],(a=s.usernames.includes(username))?fetchBusinessInformation():(app.innerHTML="<h5>Page Not Found   |   Error 404   |   Code-012</h5>",console.log("code for 404 is here"))):console.log("We have error")}catch(t){return t}}function filterUpdater(e,s,a){let i=e,t=s,n=a;t&&(t.checked?("country"===t.dataset.type&&countries.push(t.value),"city"===t.dataset.type&&cities.push(t.value),"category"===t.dataset.type&&categories.push(t.value)):t.checked||("country"===t.dataset.type&&(countries=countries.filter(e=>e!==t.value)),"city"===t.dataset.type&&(cities=cities.filter(e=>e!==t.value)),"category"===t.dataset.type&&(categories=categories.filter(e=>e!==t.value)))),i.forEach(e=>{e.style.display="flex"}),(countries.length>0||cities.length>0||categories.length>0)&&(i.forEach(e=>{e.style.display="none"}),i.forEach(e=>{countries.length>0&&countries.forEach(s=>{e.dataset.country.toLowerCase().trim()===s.toLowerCase().trim()&&(e.style.display="flex")}),cities.length>0&&cities.forEach(s=>{e.dataset.city.toLowerCase().trim()===s.toLowerCase().trim()&&(e.style.display="flex")}),categories.length>0&&categories.forEach(s=>{e.dataset.category===s&&(e.style.display="flex")})})),i.forEach(e=>{if("none"!==getComputedStyle(e).display){let s=e.dataset.name.toLowerCase(),a=s.includes(n);a?e.style.display="flex":e.style.display="none"}})}function filterTitleUpdater(e,s){let a=!1,i=!1,t=!1;e.forEach(e=>{"country"===e.dataset.type&&e.checked&&(a=!0),"city"===e.dataset.type&&e.checked&&(i=!0),"category"===e.dataset.type&&e.checked&&(t=!0)}),s.forEach(e=>{"country"===e.dataset.type.toLowerCase().trim()&&a?e.innerHTML="Selected":"country"===e.dataset.type.toLowerCase().trim()&&(e.innerHTML="All Countries"),"city"===e.dataset.type.toLowerCase().trim()&&i?e.innerHTML="Selected":"city"===e.dataset.type.toLowerCase().trim()&&(e.innerHTML="All Cities"),"category"===e.dataset.type.toLowerCase().trim()&&t?e.innerHTML="Selected":"category"===e.dataset.type.toLowerCase().trim()&&(e.innerHTML="All Categories")})}function filterDropdownCityUpdater(){let e=document.querySelector(".filter-city .dropdown-content");e.innerHTML="",locationsDrobDownVar.countries.forEach((s,a)=>{countries.forEach(s=>{s===locationsDrobDownVar.countries[a].slug&&locationsDrobDownVar.countries[a].subcategories.forEach((s,i)=>{e.innerHTML+=`
+    </main>`;
+
+
+  const homeFormSubmit = document.querySelector(`.home-form-explore`);
+  const homeExploreButton = document.querySelector(`.home-search button`);
+  const searchFieldHome = document.querySelector(`.home-form-explore input`)
+
+  homeExploreButton.addEventListener('click', function (e) {
+    e.preventDefault();
+    searchFilter = searchFieldHome.value;
+    history.pushState(null, null, `/businesses-explorer`);
+    renderPage(`/businesses-explorer`);
+  })
+
+  homeFormSubmit.addEventListener('submit', function (e) {
+    e.preventDefault();
+    searchFilter = searchFieldHome.value.trim().toLowerCase();
+
+    console.log(searchFieldHome.value);
+    console.log(searchFilter);
+    history.pushState(null, null, `/businesses-explorer`);
+    renderPage(`/businesses-explorer`);
+  })
+  searchFieldHome.focus();
+
+
+}
+
+
+
+
+//business username validity checker
+async function businessUsernamesChecker(urlName) {
+  let data;
+  let isValid;
+  try {
+    const response = await fetch(
+      `resources/businesses/general/businessUsernames.json`
+    );
+    if (response) {
+      data = await response.json();
+      username = urlName.split(`/`)[1];
+      isValid = data.usernames.includes(username);
+      if (isValid) {
+        fetchBusinessInformation();
+      } else {
+        app.innerHTML = "<h5>Page Not Found   |   Error 404   |   Code-012</h5>";
+        console.log("code for 404 is here");
+      }
+    } else {
+      console.log("We have error");
+    }
+  } catch (error) {
+    // You can handle errors or return a default value here if needed
+    return error;
+  }
+}
+
+
+
+
+// function filter updater
+function filterUpdater(defaultBusinessCards, defaultCheckBox, searchInput) {
+  // console.log(businessCards)
+  let businessCards = defaultBusinessCards;
+  let checkBox = defaultCheckBox;
+  let searchField = searchInput;
+
+  if (checkBox) {
+    if (checkBox.checked) {
+      if (checkBox.dataset.type === "country") {
+        countries.push(checkBox.value);
+      }
+
+      if (checkBox.dataset.type === "city") {
+        cities.push(checkBox.value);
+
+
+      }
+
+      if (checkBox.dataset.type === "category") {
+        categories.push(checkBox.value);
+
+      }
+
+    }
+    else if (!checkBox.checked) {
+
+      if (checkBox.dataset.type === "country") {
+        countries = countries.filter(element => element !== checkBox.value);
+      }
+
+      if (checkBox.dataset.type === "city") {
+        cities = cities.filter(element => element !== checkBox.value);
+
+
+      }
+
+      if (checkBox.dataset.type === "category") {
+        categories = categories.filter(element => element !== checkBox.value);
+
+      }
+
+    }
+
+  }
+  businessCards.forEach(elem => {
+    elem.style.display = 'flex';
+  })
+
+  if (countries.length > 0 || cities.length > 0 || categories.length > 0) {
+    businessCards.forEach(elem => {
+      elem.style.display = 'none';
+    })
+    businessCards.forEach(elem => {
+      if (countries.length > 0) {
+        countries.forEach(country => {
+          if (elem.dataset.country.toLowerCase().trim() === country.toLowerCase().trim()) {
+            elem.style.display = 'flex';
+          }
+        })
+      }
+
+      if (cities.length > 0) {
+        cities.forEach(city => {
+          if (elem.dataset.city.toLowerCase().trim() === city.toLowerCase().trim()) {
+            elem.style.display = 'flex';
+          }
+        })
+      }
+
+      if (categories.length > 0) {
+        categories.forEach(category => {
+          if (elem.dataset.category === category) {
+            elem.style.display = 'flex';
+          }
+        })
+      }
+    })
+  }
+
+
+  businessCards.forEach(element => {
+    if (getComputedStyle(element).display !== 'none') {
+      const name = element.dataset.name.toLowerCase();
+      const matchName = name.includes(searchField);
+      if (matchName) {
+        element.style.display = "flex"; // Show the card if the name starts with the search text
+      } else {
+        element.style.display = "none"; // Hide the card if no match is found
+      }
+    }
+  });
+}
+
+// filter title Updater
+function filterTitleUpdater(checkboxes, filterTitle) {
+  let country = false;
+  let city = false;
+  let category = false;
+
+  checkboxes.forEach(elem => {
+    if (elem.dataset.type === "country") {
+      if (elem.checked) {
+        country = true;
+      }
+    }
+
+    if (elem.dataset.type === "city") {
+      if (elem.checked) {
+        city = true;
+      }
+    }
+
+    if (elem.dataset.type === "category") {
+      if (elem.checked) {
+        category = true;
+      }
+    }
+
+  })
+
+  filterTitle.forEach(elem => {
+
+    if (elem.dataset.type.toLowerCase().trim() === 'country' && country) {
+      elem.innerHTML = 'Selected';
+    } else {
+      if (elem.dataset.type.toLowerCase().trim() === 'country') {
+        elem.innerHTML = 'All Countries';
+      }
+    }
+
+    if (elem.dataset.type.toLowerCase().trim() === 'city' && city) {
+      elem.innerHTML = 'Selected';
+    } else {
+      if (elem.dataset.type.toLowerCase().trim() === 'city') {
+        elem.innerHTML = 'All Cities';
+      }
+    }
+
+    if (elem.dataset.type.toLowerCase().trim() === 'category' && category) {
+      elem.innerHTML = 'Selected';
+    } else {
+      if (elem.dataset.type.toLowerCase().trim() === 'category') {
+        elem.innerHTML = 'All Categories';
+      }
+    }
+
+  })
+
+}
+
+
+
+// City filter dropdown updater 
+function filterDropdownCityUpdater() {
+  const filterCity = document.querySelector(`.filter-city .dropdown-content`)
+  // console.log(countries);
+  // console.log(locationsDrobDownVar.countries[0].slug);
+  // console.log(locationsDrobDownVar);
+  filterCity.innerHTML = ``;
+  locationsDrobDownVar.countries.forEach((key, index) => {
+    countries.forEach(element => {
+      if (element === locationsDrobDownVar.countries[index].slug) {
+        locationsDrobDownVar.countries[index].subcategories.forEach((elem, ind) => {
+          filterCity.innerHTML += `
               <label>
-                <span > ${locationsDrobDownVar.countries[a].subcategories[i].title}</span>
-                <input type="checkbox" value="${locationsDrobDownVar.countries[a].subcategories[i].slug}" data-type="city">
-              </label>  `})})}),0===countries.length&&locationsDrobDownVar.countries.forEach((s,a)=>{locationsDrobDownVar.countries[a].subcategories.forEach((s,i)=>{e.innerHTML+=`
+                <span > ${locationsDrobDownVar.countries[index].subcategories[ind].title}</span>
+                <input type="checkbox" value="${locationsDrobDownVar.countries[index].subcategories[ind].slug}" data-type="city">
+              </label>  `;
+        })
+      }
+    })
+  })
+
+  if (countries.length === 0) {
+    locationsDrobDownVar.countries.forEach((key, index) => {
+      locationsDrobDownVar.countries[index].subcategories.forEach((elem, ind) => {
+        filterCity.innerHTML += `
               <label>
-                <span > ${locationsDrobDownVar.countries[a].subcategories[i].title}</span>
-                <input type="checkbox" value="${locationsDrobDownVar.countries[a].subcategories[i].slug}" data-type="city">
-              </label>  `})})}function addToContactFunc(e,s,a,i,t){e.addEventListener("click",()=>{let e=s.replace(/[<>:"/\\|?*]/g,""),n=e.substring(0,255),o={name:n,email:a,phoneNumber:t,website:i},r=`BEGIN:VCARD
+                <span > ${locationsDrobDownVar.countries[index].subcategories[ind].title}</span>
+                <input type="checkbox" value="${locationsDrobDownVar.countries[index].subcategories[ind].slug}" data-type="city">
+              </label>  `;
+      })
+    })
+  }
+
+}
+
+
+// add to contact vCard function - vCard Maker
+function addToContactFunc(addToContact, vName, vEmail, vWebsite, vPhone) {
+  addToContact.addEventListener('click', () => {
+
+    const sanitizedName = vName.replace(/[<>:"/\\|?*]/g, '');
+    const filename = sanitizedName.substring(0, 255);
+
+    const contact = {
+      name: filename,
+      email: vEmail,
+      phoneNumber: vPhone,
+      website: vWebsite
+    };
+
+    const vCard = `BEGIN:VCARD
 VERSION:3.0
-FN:${o.name}
-EMAIL:${o.email}
-TEL:${o.phoneNumber}
-URL:${o.website}
-END:VCARD`,l=new Blob([r],{type:"text/vcard"}),c=document.createElement("a");c.href=window.URL.createObjectURL(l),c.download=n+".vcf",c.click()})}window.onload=function(){loader.style.display="none"},window.addEventListener("popstate",navigate),navigate();const navLogoLink=document.querySelector(".nav-logo");navLogoLink.addEventListener("click",function(){history.pushState(null,null,"/"),renderPage("/")});const headerBusinessExplorerButton=document.querySelector(".header-business-explorer");function modalShareInfoHandler(e){let s=document.getElementById("myModal"),a=document.querySelector(".modal-content input"),i=document.getElementsByClassName("close")[0],t=document.getElementById("copyBtn"),n=document.getElementById("copyLinkInput");s.style.display="flex",a.value=e,i.onclick=function(){s.style.display="none"},window.onclick=function(e){e.target==s&&(s.style.display="none")},t.onclick=function(){n.select(),document.execCommand("copy"),s.style.display="none",notification("Link copied!")}}headerBusinessExplorerButton.addEventListener("click",function(){history.pushState(null,null,"/businesses-explorer"),renderPage("/businesses-explorer")});const notif=document.querySelector(".notifications");function notification(e){notif.innerHTML=e,notif.style.display="flex",setInterval(()=>{notif.style.display="none"},2e3)}
+FN:${contact.name}
+EMAIL:${contact.email}
+TEL:${contact.phoneNumber}
+URL:${contact.website}
+END:VCARD`;
+
+
+    const blob = new Blob([vCard], { type: 'text/vcard' });
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = filename + '.vcf';
+    ;
+    link.click();
+  });
+}
+
+
+// logo event listener
+const navLogoLink = document.querySelector(`.nav-logo`);
+navLogoLink.addEventListener('click', function () {
+  history.pushState(null, null, `/`);
+  renderPage(`/`);
+})
+
+
+//business explorer btn event click
+const headerBusinessExplorerButton = document.querySelector(`.header-business-explorer`);
+headerBusinessExplorerButton.addEventListener('click', function () {
+  history.pushState(null, null, `/businesses-explorer`);
+  renderPage(`/businesses-explorer`);
+})
+
+
+
+// modal share info function ////////////////////////////////////
+// Get the modal and the buttons
+function modalShareInfoHandler(link) {
+
+  const modal = document.getElementById('myModal');
+  const modalContent = document.querySelector('.modal-content input');
+  const closeBtn = document.getElementsByClassName('close')[0];
+  const copyBtn = document.getElementById('copyBtn');
+  const copyLinkInput = document.getElementById('copyLinkInput');
+
+
+  modal.style.display = 'flex';
+  modalContent.value = link;
+
+  // Close the modal when the '×' button is clicked
+  closeBtn.onclick = function () {
+    modal.style.display = 'none';
+  };
+
+  // Close the modal if clicked outside of it
+  window.onclick = function (event) {
+    if (event.target == modal) {
+      modal.style.display = 'none';
+    }
+  };
+
+
+  // Copy link to clipboard when the 'Copy Link' button is clicked
+  copyBtn.onclick = function () {
+    copyLinkInput.select();
+    document.execCommand('copy');
+    modal.style.display = 'none';
+    notification("Link copied!");
+  };
+
+
+}
+
+// notification function
+const notif = document.querySelector('.notifications')
+function notification(message) {
+  notif.innerHTML = message;
+  notif.style.display = 'flex';
+  setInterval(() => {
+    notif.style.display = 'none'
+  }, 2000);
+}
+
+
+// live-server --entry-file=index.html
