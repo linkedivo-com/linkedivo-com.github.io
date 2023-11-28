@@ -1205,5 +1205,4 @@ function notification(message) {
   }, 2000);
 }
 
-
 // live-server --entry-file=index.html
