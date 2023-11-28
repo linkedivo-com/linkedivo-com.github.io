@@ -645,8 +645,7 @@ function explorerPageMaker() {
     searchFilter = e.target.value.trim().toLowerCase();
     filterUpdater(defaultBusinessCards, defaultCheckBox, searchFilter);
   });
-  searchFilter = e.target.value.trim().toLowerCase();
-  filterUpdater(allBusinessesCard, defaultCheckBox, searchFilter);
+  filterUpdater(allBusinessesCard, defaultCheckBox, searchFilter.trim().toLowerCase());
 
 
   // add event click for explore more
